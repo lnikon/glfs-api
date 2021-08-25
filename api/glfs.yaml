@@ -13,7 +13,39 @@ servers:
 - url: https://virtserver.swaggerhub.com/vagag/GraphLibraryService/1.0.0
   description: SwaggerHub API Auto Mocking
 paths:
+  /algorithm:
+    get:
+      summary: Return computations that are currently running
+      operationId: getAlgorithm
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Algorithm'
   /computation:
+    get:
+      summary: Return computations that specified by a state
+      operationId: getComputations
+      parameters:
+      - name: state
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/State'
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
     post:
       summary: Start new graph computation
       operationId: startComputation
@@ -38,16 +70,23 @@ components:
       type: string
       description: Enumeration of supported algorithms. Should be used everywhere algorithm needs to be specified
       enum:
-      - Prim
-      - Kruskal
+      - prim
+      - kruskal
     Graph:
       required:
-      - graph
+      - data
       properties:
-        graph:
+        data:
           type: string
           example: a 1 b 2 c 2
       description: Serilized graph on which the computation should be performed
+    State:
+      type: string
+      description: State of the computation(e.g. Running, Finished)
+      enum:
+      - ready
+      - inProgress
+      - finished
     Instance:
       type: string
       description: Enumeration of supported instance types. Should be used everywhere instance needs to be specified
@@ -61,6 +100,7 @@ components:
       - graph
       - instance
       - scaling
+      - state
       type: object
       properties:
         algorithm:
@@ -72,6 +112,8 @@ components:
         scaling:
           type: number
           example: 3
+        state:
+          $ref: '#/components/schemas/State'
       description: Parameters needed to perform an computation
   requestBodies:
     Computation:
